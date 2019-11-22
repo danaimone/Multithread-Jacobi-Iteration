@@ -4,3 +4,8 @@
 
 #include "cthread.h"
 //TODO: getThreadId, getDelta, setThreadId, setDelta
+
+/*
+ * Is this even needed?
+ *
+ */
