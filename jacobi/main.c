@@ -20,9 +20,7 @@ int main(int argc, char *argv[]) {
     //TODO: initialize threads
     pthread_t threads[NOTH];
     threadCreate(threads, NOTH);
-    //will be the thread id (e.g. thread 0 will start at 0, thread 1 at 1)
-    int startIndex = 0;
-    int increment = NOTH;
+
 
     return 0;
 }
@@ -31,15 +29,19 @@ void threadCreate(pthread_t threads[], int noth){
     //init semaphore
 
     for(int i = 0; i < noth, i++) {
+        //will be the thread id (e.g. thread 0 will start at 0, thread 1 at 1)
+        int startIndex = 0;
+        int increment = NOTH;
+
         //TODO: start threads - &start_func (compute?) and block (barrier?)
         //pthread_create(&threads[i, NULL, &start_func, block);
     }
 
     for(int i = 0; i < noth; i++){
         //TODO: join threads
-        //new block
-        //pthread_join(threads[i], &block);
-        //free(block)
+        //new stuct
+        //pthread_join(threads[i], &struct);
+        //free(struct)
     }
 
     //destroy semaphore
@@ -51,7 +53,6 @@ void compute(double (*P)[], double (*N)[], int increment, int startIndex){
         for(int j = 0; j < MATRIX_SIZE; j++){
             (*N)[j] = ( (*P+i)[j] + (*P-i)[j] +
                         (*P)[j-1] + (*P)[j+1]   ) / 4.0;
-
         }
     }
 }
