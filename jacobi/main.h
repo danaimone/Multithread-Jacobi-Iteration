@@ -8,15 +8,15 @@
 int main(int argc, char *argv[]);
 
 /* Compute the values for the new matrix from the previous matrix.
- * Input: previous matrix, new matrix
+ * Input: previous matrix, new matrix, and start index
  * Output: void
  */
-void compute(double (*P)[], double (*N)[]);
+void compute(double (*P)[], double (*N)[], int increment, int startIndex);
 
 /* create the given number of threads
  * Input: number of threads
  * Output: void
  */
-void threadCreate(int noth);
+void threadCreate(pthread_t threads[], int noth);
 
 #endif //JACOBI_MAIN_H
