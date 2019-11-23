@@ -6,19 +6,12 @@
 #define JACOBI_CTHREAD_H
 #include <pthread.h>
 
-typedef struct CustomThread {
-    pthread_t thread;
+typedef struct threadArg{
+    sem_t *lock;
     int customThreadId;
     double delta;
-} cthread;
-
-
-int getThreadId();
-
-double getDelta();
-
-int setThreadId(int newId);
-
-double setDelta(double newDelta);
+    double (*prev)[];
+    double (*next)[];
+}tArg;
 
 #endif //JACOBI_CTHREAD_H

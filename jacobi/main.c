@@ -14,25 +14,32 @@
 #define NOTH 1
 
 const double (*previous)[MATRIX_SIZE];
+const double (*next)[MATRIX_SIZE];
 
 int main(int argc, char *argv[]) {
+
     previous = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
+    next = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
+    //TODO: read file and populate matrices
+
     //TODO: initialize threads
     pthread_t threads[NOTH];
     threadCreate(threads, NOTH);
 
-
     return 0;
 }
 
-void threadCreate(pthread_t threads[], int noth){
+void threadCreate(pthread_t threads[], int noth, blk structure){
     //init semaphore
+    sem_t lock;
+    sem_init(&lock, 0, 1);
 
     for(int i = 0; i < noth, i++) {
+        //make block struct
+
         //will be the thread id (e.g. thread 0 will start at 0, thread 1 at 1)
         int startIndex = 0;
         int increment = NOTH;
-
         //TODO: start threads - &start_func (compute?) and block (barrier?)
         //pthread_create(&threads[i, NULL, &start_func, block);
     }
@@ -45,6 +52,11 @@ void threadCreate(pthread_t threads[], int noth){
     }
 
     //destroy semaphore
+    sem_destroy(&lock);
+}
+
+struct block makeThreadArg(){
+
 
 }
 
