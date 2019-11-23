@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
@@ -29,18 +30,18 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void threadCreate(pthread_t threads[], int noth, blk structure){
+void threadCreate(pthread_t threads[], int noth){
     //init semaphore
     sem_t lock;
     sem_init(&lock, 0, 1);
 
-    for(int i = 0; i < noth, i++) {
+    for(int i = 0; i < noth; i++) {
         //make block struct
 
         //will be the thread id (e.g. thread 0 will start at 0, thread 1 at 1)
-        int startIndex = 0;
+        int startIndex = i;
         int increment = NOTH;
-        //TODO: start threads - &start_func (compute?) and block (barrier?)
+        //TODO: start threads - &start_func (?) and tArg
         //pthread_create(&threads[i, NULL, &start_func, block);
     }
 
@@ -55,7 +56,7 @@ void threadCreate(pthread_t threads[], int noth, blk structure){
     sem_destroy(&lock);
 }
 
-struct block makeThreadArg(){
+tArg makeThreadArg(){
 
 
 }

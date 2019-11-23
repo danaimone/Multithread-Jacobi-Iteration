@@ -5,6 +5,8 @@
 #ifndef JACOBI_MAIN_H
 #define JACOBI_MAIN_H
 
+#include <pthread.h>
+
 int main(int argc, char *argv[]);
 
 /* Compute the values for the new matrix from the previous matrix.
