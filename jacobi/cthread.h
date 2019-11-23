@@ -6,9 +6,11 @@
 #define JACOBI_CTHREAD_H
 #include <pthread.h>
 #include <semaphore.h>
+#include "barrier.h"
 
-typedef struct threadArg{
+typedef struct ThreadArg{
     sem_t *lock;
+    barrier *bar;
     int customThreadId;
     double delta;
     double (*prev)[];

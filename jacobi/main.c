@@ -16,6 +16,7 @@
 
 #define MATRIX_SIZE 1024
 #define NOTH 1
+#define epsilon 0.001
 
 const double (*previous)[MATRIX_SIZE];
 const double (*next)[MATRIX_SIZE];
@@ -40,8 +41,10 @@ int main(int argc, char *argv[]) {
     }
     printMatrix(previous, MATRIX_SIZE);
     //TODO: initialize threads
-//    pthread_t threads[NOTH];
-//    threadCreate(threads, NOTH);
+    pthread_t threads[NOTH];
+    barrier *bar = malloc(sizeof(barrier));
+    barrierInit(&bar, NOTH);
+    threadCreate(threads, NOTH, bar);
 
     return 0;
 }
@@ -68,42 +71,60 @@ void printUsage(char *argv[]) {
     printf("usage: %s [input-file]\n", argv[0]);
 }
 
-void threadCreate(pthread_t threads[], int noth){
+
+void threadCreate(pthread_t threads[], int noth, barrier *bar){
     //init semaphore
     sem_t lock;
     sem_init(&lock, 0, 1);
 
     for(int i = 0; i < noth; i++) {
         //make block struct
-
-        //will be the thread id (e.g. thread 0 will start at 0, thread 1 at 1)
-        int startIndex = i;
-        int increment = NOTH;
+        tArg *threadArg = makeThreadArg(previous, next, &lock, i, &bar);
         //TODO: start threads - &start_func (?) and tArg
-        //pthread_create(&threads[i, NULL, &start_func, block);
+        pthread_create(&threads[i], NULL, &computeJacobi, threadArg);
     }
 
     for(int i = 0; i < noth; i++){
         //TODO: join threads
-        //new stuct
-        //pthread_join(threads[i], &struct);
-        //free(struct)
+        tArg *threadArg;
+        pthread_join(threads[i], &threadArg);
+        free(threadArg);
     }
 
     //destroy semaphore
     sem_destroy(&lock);
 }
 
-tArg makeThreadArg(){
-
-
+void computeJacobi(void *arg){
+    tArg *threadArg = arg;
+    threadArg->delta = computeCell(threadArg->prev, threadArg->next, threadArg->customThreadId);
+    //TODO: barrier here? check delta vs. epsilon to continue
+    arrive(threadArg->bar, threadArg->customThreadId);
 }
 
-void compute(double (*P)[], double (*N)[], int increment, int startIndex){
-    for(int i = startIndex; i < MATRIX_SIZE, i+=increment;){
+tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrier *bar){
+    tArg *threadArg = malloc(sizeof(struct ThreadArg));
+    threadArg->customThreadId = i;
+    threadArg->delta = 0;
+    threadArg->lock = lock;
+    threadArg->next = next;
+    threadArg->prev = prev;
+    threadArg->bar = bar;
+
+    return threadArg;
+}
+
+double computeCell(double (*P)[], double (*N)[], int threadNo){
+    double maxDelta = 0.0;
+    for(int i = threadNo; i < MATRIX_SIZE, i+=threadNo;){
         for(int j = 0; j < MATRIX_SIZE; j++){
             (*N)[j] = ( (*P+i)[j] + (*P-i)[j] +
                         (*P)[j-1] + (*P)[j+1]   ) / 4.0;
+            double curDelta = (*P)[j] - (*N)[j];
+            if(maxDelta > curDelta){
+                maxDelta = curDelta;
+            }
         }
     }
+    return maxDelta;
 }

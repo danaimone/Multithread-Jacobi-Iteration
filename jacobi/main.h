@@ -6,6 +6,8 @@
 #define JACOBI_MAIN_H
 
 #include <pthread.h>
+#include "cthread.h"
+#include "barrier.h"
 
 int main(int argc, char *argv[]);
 
@@ -19,12 +21,15 @@ void printMatrix(const double (*matrix)[], int matrixSize);
  * Input: previous matrix, new matrix, and start index
  * Output: void
  */
-void compute(double (*P)[], double (*N)[], int increment, int startIndex);
+double computeCell(double (*P)[], double (*N)[], int threadNo);
+
+tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrier *bar);
+void computeJacobi(void *threadArg);
 
 /* create the given number of threads
  * Input: number of threads
  * Output: void
  */
-void threadCreate(pthread_t threads[], int noth);
+void threadCreate(pthread_t threads[], int noth, barrier *bar);
 
 #endif //JACOBI_MAIN_H

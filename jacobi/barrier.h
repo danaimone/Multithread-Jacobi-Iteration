@@ -9,7 +9,7 @@
 #include "cthread.h"
 
 typedef struct Barrier {
-    sem_t sem;
+    sem_t lock;
     int maxThreads;
     int currentthreads;
     sem_t done[];
@@ -25,6 +25,6 @@ void barrierInit(barrier *bar, unsigned noth);
  * Input: barrier and current thread
  * Output: void
  */
-void arrive(barrier *bar, cthread thread);
+void arrive(barrier *bar, tArg thread);
 
 #endif //JACOBI_BARRIER_H
