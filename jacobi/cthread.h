@@ -4,17 +4,17 @@
 
 #ifndef JACOBI_CTHREAD_H
 #define JACOBI_CTHREAD_H
+#include "barrier.h"
 #include <pthread.h>
 #include <semaphore.h>
-#include "barrier.h"
 
 typedef struct ThreadArg{
     sem_t *lock;
-    barrier *bar;
+    struct Barrier *bar;
     int customThreadId;
     double delta;
     double (*prev)[];
     double (*next)[];
-}tArg;
+} tArg;
 
 #endif //JACOBI_CTHREAD_H

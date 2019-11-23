@@ -4,10 +4,11 @@
 
 #include <semaphore.h>
 #include "barrier.h"
+#include "cthread.h"
 
 void barrierInit(barrier *bar, unsigned noth){
     bar->maxThreads = noth;
-    bar->currentthreads = 0;
+    bar->currentThreads = 0;
     for (int i = 0; i < noth; i++) {
         sem_init(&bar->done[i], 0, 0);
     }
@@ -17,17 +18,16 @@ void barrierInit(barrier *bar, unsigned noth){
 
 void arrive(barrier *bar, tArg thread){
     sem_wait(&bar->lock);
-    bar->currentthreads++;
+    bar->currentThreads++;
     sem_post(&bar->lock);
 
-    if(bar->currentthreads < bar->maxThreads){
+    if(bar->currentThreads < bar->maxThreads){
         sem_wait(&bar->done[thread.customThreadId]);
     } else {
         for(int i = 0; i < bar->maxThreads; i++){
             sem_post(&bar->done[i]);
         }
         sem_wait(&bar->done[thread.customThreadId]);
-        bar->currentthreads = 0;
+        bar->currentThreads = 0;
     }
-
 }

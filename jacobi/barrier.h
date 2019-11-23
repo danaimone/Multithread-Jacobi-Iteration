@@ -11,7 +11,7 @@
 typedef struct Barrier {
     sem_t lock;
     int maxThreads;
-    int currentthreads;
+    int currentThreads;
     sem_t done[];
 } barrier;
 
@@ -25,6 +25,6 @@ void barrierInit(barrier *bar, unsigned noth);
  * Input: barrier and current thread
  * Output: void
  */
-void arrive(barrier *bar, tArg thread);
+void arrive(barrier *bar, struct ThreadArg thread);
 
 #endif //JACOBI_BARRIER_H

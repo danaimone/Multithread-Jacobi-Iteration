@@ -1,0 +1,1 @@
+/usr/bin/cc  -pthread -g   CMakeFiles/jacobi.dir/barrier.c.o CMakeFiles/jacobi.dir/main.c.o  -o jacobi 

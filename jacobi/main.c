@@ -16,10 +16,10 @@
 
 #define MATRIX_SIZE 1024
 #define NOTH 1
-#define epsilon 0.001
+#define EPSILON 0.001
 
-const double (*previous)[MATRIX_SIZE];
-const double (*next)[MATRIX_SIZE];
+double (*previous)[MATRIX_SIZE];
+double (*next)[MATRIX_SIZE];
 
 int main(int argc, char *argv[]) {
     FILE *fp;
@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
     if (fp != NULL) {
         // TODO: populate matrix, potentially do this another function
         for (int i = 0; i < MATRIX_SIZE; i++) {
-            for (int j = 0; i < MATRIX_SIZE; j++) {
-                fscanf(fp, "%f", (*previous+i)[j]);
+            for (int j = 0; j < MATRIX_SIZE; j++) {
+                fscanf(fp, "%lf ", &(*previous+i)[j]);
             }
         }
     } else {
@@ -43,18 +43,19 @@ int main(int argc, char *argv[]) {
     //TODO: initialize threads
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
-    barrierInit(&bar, NOTH);
+    barrierInit(bar, NOTH);
     threadCreate(threads, NOTH, bar);
 
     return 0;
 }
 
 void printMatrix(const double (*matrix)[], int matrixSize) {
-    for (int i = 0; i < matrixSize; ++i) {
-        for (int j = 0; i < matrixSize; ++j) {
-            printf("%f", (*matrix+i)[j]);
+    for (int i = 1; i < matrixSize; i++) {
+        for (int j = 0; j < matrixSize; j++) {
+            double value = (*matrix+i)[j];
+            //printf("%lf \n", (*matrix+j)[i]);
+
         }
-        printf("\n");
     }
 }
 
@@ -99,13 +100,13 @@ void computeJacobi(void *arg){
     tArg *threadArg = arg;
     threadArg->delta = computeCell(threadArg->prev, threadArg->next, threadArg->customThreadId);
     //TODO: barrier here? check delta vs. epsilon to continue
-    arrive(threadArg->bar, threadArg->customThreadId);
+//    arrive(threadArg->bar, threadArg->customThreadId);
 }
 
 tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrier *bar){
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
     threadArg->customThreadId = i;
-    threadArg->delta = 0;
+    threadArg->delta = 0.0;
     threadArg->lock = lock;
     threadArg->next = next;
     threadArg->prev = prev;
