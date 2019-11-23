@@ -31,8 +31,14 @@ int main(int argc, char *argv[]) {
         // TODO: populate matrix, potentially do this another function
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                fscanf(fp, "%lf ", &(*previous+i)[j]);
+                double val;
+                fscanf(fp, "%lf ", &val);
+                (*previous)[j] = val;
+                //printf("%lf \n", val);
             }
+
+            //TODO: here is the problem area
+            (*previous[MATRIX_SIZE])+=i;
         }
     } else {
         perror("fopen");
@@ -41,21 +47,22 @@ int main(int argc, char *argv[]) {
     }
     printMatrix(previous, MATRIX_SIZE);
     //TODO: initialize threads
-    pthread_t threads[NOTH];
-    barrier *bar = malloc(sizeof(barrier));
-    barrierInit(bar, NOTH);
-    threadCreate(threads, NOTH, bar);
+//    pthread_t threads[NOTH];
+//    barrier *bar = malloc(sizeof(barrier));
+//    barrierInit(bar, NOTH);
+//    threadCreate(threads, NOTH, bar);
 
     return 0;
 }
 
-void printMatrix(const double (*matrix)[], int matrixSize) {
-    for (int i = 1; i < matrixSize; i++) {
+void printMatrix(double (*matrix)[MATRIX_SIZE], int matrixSize) {
+    for (int i = 0; i < 2; i++) {
         for (int j = 0; j < matrixSize; j++) {
-            double value = (*matrix+i)[j];
-            //printf("%lf \n", (*matrix+j)[i]);
-
+            double value = (*matrix)[j];
+            printf("%lf ", value);
         }
+        printf("\n");
+        (*matrix[MATRIX_SIZE])++;
     }
 }
 
