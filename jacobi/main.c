@@ -33,12 +33,8 @@ int main(int argc, char *argv[]) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
                 double val;
                 fscanf(fp, "%lf ", &val);
-                (*previous)[j] = val;
-                //printf("%lf \n", val);
+                (*previous+1024*i)[j] = val;
             }
-
-            //TODO: here is the problem area
-            (*previous[MATRIX_SIZE])+=i;
         }
     } else {
         perror("fopen");
@@ -56,13 +52,12 @@ int main(int argc, char *argv[]) {
 }
 
 void printMatrix(double (*matrix)[MATRIX_SIZE], int matrixSize) {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < matrixSize; i++) {
         for (int j = 0; j < matrixSize; j++) {
-            double value = (*matrix)[j];
+            double value = (*matrix+1024*i)[j];
             printf("%lf ", value);
         }
         printf("\n");
-        (*matrix[MATRIX_SIZE])++;
     }
 }
 
