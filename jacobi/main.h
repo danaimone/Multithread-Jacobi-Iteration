@@ -9,6 +9,12 @@
 
 int main(int argc, char *argv[]);
 
+char* processArgs(int argc, char *argv[]);
+
+void printUsage(char *argv[]);
+
+void printMatrix(const double (*matrix)[], int matrixSize);
+
 /* Compute the values for the new matrix from the previous matrix.
  * Input: previous matrix, new matrix, and start index
  * Output: void

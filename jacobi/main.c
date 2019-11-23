@@ -7,9 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <getopt.h>
+#include <sys/stat.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
+
 
 #define MATRIX_SIZE 1024
 #define NOTH 1
@@ -18,16 +21,51 @@ const double (*previous)[MATRIX_SIZE];
 const double (*next)[MATRIX_SIZE];
 
 int main(int argc, char *argv[]) {
-
+    FILE *fp;
     previous = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     next = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
-    //TODO: read file and populate matrices
-
+    char *fileName = processArgs(argc, argv);
+    fp = fopen(fileName, "r");
+    if (fp != NULL) {
+        // TODO: populate matrix, potentially do this another function
+        for (int i = 0; i < MATRIX_SIZE; i++) {
+            for (int j = 0; i < MATRIX_SIZE; j++) {
+                fscanf(fp, "%f", (*previous+i)[j]);
+            }
+        }
+    } else {
+        perror("fopen");
+        printUsage(argv);
+        exit(EXIT_FAILURE);
+    }
+    printMatrix(previous, MATRIX_SIZE);
     //TODO: initialize threads
-    pthread_t threads[NOTH];
-    threadCreate(threads, NOTH);
+//    pthread_t threads[NOTH];
+//    threadCreate(threads, NOTH);
 
     return 0;
+}
+
+void printMatrix(const double (*matrix)[], int matrixSize) {
+    for (int i = 0; i < matrixSize; ++i) {
+        for (int j = 0; i < matrixSize; ++j) {
+            printf("%f", (*matrix+i)[j]);
+        }
+        printf("\n");
+    }
+}
+
+char* processArgs(int argc, char *argv[]) {
+    if (argc > 2) {
+        printf("%s: expected 1 argument [file], but was given %d.\n", argv[0], argc - 1);
+        printUsage(argv);
+        exit(EXIT_FAILURE);
+    }
+    return argv[1];
+}
+
+void printUsage(char *argv[]) {
+    printf("usage: %s [input-file]\n", argv[0]);
 }
 
 void threadCreate(pthread_t threads[], int noth){

@@ -5,7 +5,7 @@
 #ifndef JACOBI_BARRIER_H
 #define JACOBI_BARRIER_H
 
-#include <bits/semaphore.h>
+#include <semaphore.h>
 #include "cthread.h"
 
 typedef struct Barrier {

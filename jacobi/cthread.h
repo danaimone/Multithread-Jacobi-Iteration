@@ -5,7 +5,7 @@
 #ifndef JACOBI_CTHREAD_H
 #define JACOBI_CTHREAD_H
 #include <pthread.h>
-#include <bits/semaphore.h>
+#include <semaphore.h>
 
 typedef struct threadArg{
     sem_t *lock;
