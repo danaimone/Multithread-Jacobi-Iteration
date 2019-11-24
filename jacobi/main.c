@@ -16,7 +16,6 @@
 
 #define MATRIX_SIZE 1024
 #define NOTH 1
-#define EPSILON 0.001
 
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
@@ -28,12 +27,10 @@ int main(int argc, char *argv[]) {
     char *fileName = processArgs(argc, argv);
     fp = fopen(fileName, "r");
     if (fp != NULL) {
-        // TODO: populate matrix, potentially do this another function
+        //TODO: populate matrix, potentially do this another function
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                double val;
-                fscanf(fp, "%lf ", &val);
-                (*previous+1024*i)[j] = val;
+                fscanf(fp, "%lf ", &(*previous+1024*i)[j]);
             }
         }
     } else {
@@ -41,12 +38,13 @@ int main(int argc, char *argv[]) {
         printUsage(argv);
         exit(EXIT_FAILURE);
     }
-    printMatrix(previous, MATRIX_SIZE);
+    //printMatrix(previous, MATRIX_SIZE);
+
     //TODO: initialize threads
-//    pthread_t threads[NOTH];
-//    barrier *bar = malloc(sizeof(barrier));
-//    barrierInit(bar, NOTH);
-//    threadCreate(threads, NOTH, bar);
+    pthread_t threads[NOTH];
+    barrier *bar = malloc(sizeof(barrier));
+    barrierInit(bar, NOTH, threads);
+    threadCreate(threads, NOTH, bar);
 
     return 0;
 }
@@ -54,8 +52,7 @@ int main(int argc, char *argv[]) {
 void printMatrix(double (*matrix)[MATRIX_SIZE], int matrixSize) {
     for (int i = 0; i < matrixSize; i++) {
         for (int j = 0; j < matrixSize; j++) {
-            double value = (*matrix+1024*i)[j];
-            printf("%lf ", value);
+            printf("%lf ", (*matrix+1024*i)[j]);
         }
         printf("\n");
     }
@@ -99,10 +96,9 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar){
 }
 
 void computeJacobi(void *arg){
-    tArg *threadArg = arg;
+    struct ThreadArg *threadArg = arg;
     threadArg->delta = computeCell(threadArg->prev, threadArg->next, threadArg->customThreadId);
-    //TODO: barrier here? check delta vs. epsilon to continue
-//    arrive(threadArg->bar, threadArg->customThreadId);
+    arrive(threadArg->bar, threadArg);
 }
 
 tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrier *bar){

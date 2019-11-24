@@ -6,9 +6,12 @@
 #include "barrier.h"
 #include "cthread.h"
 
-void barrierInit(barrier *bar, unsigned noth){
+#define EPSILON 0.001
+
+void barrierInit(barrier *bar, unsigned noth, pthread_t threads[]){
     bar->maxThreads = noth;
     bar->currentThreads = 0;
+    bar->cont = 0;
     for (int i = 0; i < noth; i++) {
         sem_init(&bar->done[i], 0, 0);
     }
@@ -19,15 +22,22 @@ void barrierInit(barrier *bar, unsigned noth){
 void arrive(barrier *bar, tArg thread){
     sem_wait(&bar->lock);
     bar->currentThreads++;
+    if(thread.delta < EPSILON){
+        bar->cont++;
+    }
     sem_post(&bar->lock);
-
     if(bar->currentThreads < bar->maxThreads){
         sem_wait(&bar->done[thread.customThreadId]);
     } else {
-        for(int i = 0; i < bar->maxThreads; i++){
-            sem_post(&bar->done[i]);
+        if(bar->cont == 0){
+            //exit?
+        }else {
+            for (int i = 0; i < bar->maxThreads; i++) {
+                sem_post(&bar->done[i]);
+            }
+            sem_wait(&bar->done[thread.customThreadId]);
+            bar->currentThreads = 0;
+            bar->cont = 0;
         }
-        sem_wait(&bar->done[thread.customThreadId]);
-        bar->currentThreads = 0;
     }
 }
