@@ -8,7 +8,7 @@
 
 #define EPSILON 0.001
 
-void barrierInit(barrier *bar, unsigned noth, pthread_t threads[]){
+void barrierInit(barrier *bar, unsigned noth){
     bar->maxThreads = noth;
     bar->currentThreads = 0;
     bar->cont = 0;
@@ -19,15 +19,15 @@ void barrierInit(barrier *bar, unsigned noth, pthread_t threads[]){
 
 }
 
-void arrive(barrier *bar, tArg thread){
+void arrive(barrier *bar, tArg *thread){
     sem_wait(&bar->lock);
     bar->currentThreads++;
-    if(thread.delta < EPSILON){
+    if(thread->delta < EPSILON){
         bar->cont++;
     }
     sem_post(&bar->lock);
     if(bar->currentThreads < bar->maxThreads){
-        sem_wait(&bar->done[thread.customThreadId]);
+        sem_wait(&bar->done[thread->customThreadId]);
     } else {
         if(bar->cont == 0){
             //exit?
@@ -35,7 +35,7 @@ void arrive(barrier *bar, tArg thread){
             for (int i = 0; i < bar->maxThreads; i++) {
                 sem_post(&bar->done[i]);
             }
-            sem_wait(&bar->done[thread.customThreadId]);
+            sem_wait(&bar->done[thread->customThreadId]);
             bar->currentThreads = 0;
             bar->cont = 0;
         }
