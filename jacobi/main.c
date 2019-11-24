@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     //TODO: initialize threads
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
-    barrierInit(bar, NOTH, threads);
+    barrierInit(bar, NOTH);
     threadCreate(threads, NOTH, bar);
 
     return 0;
@@ -96,7 +96,7 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar){
 }
 
 void computeJacobi(void *arg){
-    struct ThreadArg *threadArg = arg;
+    tArg *threadArg = arg;
     threadArg->delta = computeCell(threadArg->prev, threadArg->next, threadArg->customThreadId);
     arrive(threadArg->bar, threadArg);
 }

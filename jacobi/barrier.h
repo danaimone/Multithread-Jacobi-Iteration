@@ -20,12 +20,12 @@ typedef struct Barrier {
  * Input: barrier object and number of threads
  * Output: void
  */
-void barrierInit(barrier *bar, unsigned noth, pthread_t threads[]);
+void barrierInit(barrier *bar, unsigned noth);
 
 /* Blocks all threads from continuing Jacobi iteration
  * Input: barrier and current thread
  * Output: void
  */
-void arrive(barrier *bar, struct ThreadArg thread);
+void arrive(barrier *bar, struct ThreadArg *thread);
 
 #endif //JACOBI_BARRIER_H
