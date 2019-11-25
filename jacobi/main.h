@@ -23,9 +23,9 @@ void printMatrix(double (*matrix)[]);
  * Input: previous matrix, new matrix, and start index
  * Output: void
  */
-double computeCell(double (*P)[], double (*N)[], int threadNo);
+void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
-tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrier *bar);
+tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar);
 void computeJacobi(void *threadArg);
 
 /* create the given number of threads

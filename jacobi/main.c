@@ -90,39 +90,40 @@ void printUsage(char *argv[]) {
 
 
 void threadCreate(pthread_t threads[], int noth, barrier *bar){
-    //init semaphore
     sem_t lock;
-    sem_init(&lock, 0, 1);
-
+    sem_init(lock, 0, 1);
     for(int i = 0; i < noth; i++) {
         //make block struct
-        tArg *threadArg = makeThreadArg(previous, next, &lock, i, &bar);
+        tArg *threadArg = makeThreadArg(previous, next, i, &bar);
         //TODO: start threads - &start_func (?) and tArg
         pthread_create(&threads[i], NULL, &computeJacobi, threadArg);
     }
-
     for(int i = 0; i < noth; i++){
         //TODO: join threads
         tArg *threadArg;
         pthread_join(threads[i], &threadArg);
         free(threadArg);
     }
-
-    //destroy semaphore
-    sem_destroy(&lock);
+    sem_destroy(lock);
 }
 
 void computeJacobi(void *arg){
     tArg *threadArg = arg;
-    threadArg->delta = computeCell(threadArg->prev, threadArg->next, threadArg->customThreadId);
-    arrive(threadArg->bar, threadArg);
+    sem_wait(threadArg->lock);
+    while(threadArg->bar->cont) {
+        computeCell(threadArg->prev, threadArg->next, threadArg);
+        arrive(threadArg->bar, threadArg);
+    }
+    sem_post(threadArg->lock);
+    puts("exiting");
+
 }
 
-tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrier *bar){
+tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar){
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
     threadArg->customThreadId = i;
     threadArg->delta = 0.0;
-    threadArg->lock = lock;
+    threadArg->lock = bar->done[i];
     threadArg->next = next;
     threadArg->prev = prev;
     threadArg->bar = bar;
@@ -130,17 +131,17 @@ tArg* makeThreadArg(double(*prev)[], double(*next)[], sem_t *lock, int i, barrie
     return threadArg;
 }
 
-double computeCell(double (*P)[], double (*N)[], int threadNo){
-    double maxDelta = 0.0;
-    for(int i = threadNo; i < MATRIX_SIZE, i+=threadNo;){
-        for(int j = 0; j < MATRIX_SIZE; j++){
-            (*N)[j] = ( (*P+i)[j] + (*P-i)[j] +
-                        (*P)[j-1] + (*P)[j+1]   ) / 4.0;
-            double curDelta = (*P)[j] - (*N)[j];
-            if(maxDelta > curDelta){
-                maxDelta = curDelta;
+void computeCell(double (*P)[], double (*N)[], tArg *thread){
+    int i = thread->customThreadId+1;
+    while (i < MATRIX_SIZE){
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            (*N+1024*i)[j] = ( (*P+1024*(i+1))[j] + (*P+1024*(i-1))[j] + (*P+1024*i)[j-1] + (*P+1024*i)[j+1] ) / 4.0;
+
+            double curDelta = (*P+1024*i)[j] - (*N+1024*i)[j];
+            if(curDelta > thread->delta){
+                thread->delta = curDelta;
             }
         }
+        i += NOTH;
     }
-    return maxDelta;
 }

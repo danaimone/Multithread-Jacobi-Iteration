@@ -3,6 +3,7 @@
 //
 
 #ifndef JACOBI_BARRIER_H
+
 #define JACOBI_BARRIER_H
 
 #include <semaphore.h>
@@ -20,7 +21,7 @@ typedef struct Barrier {
  * Input: barrier object and number of threads
  * Output: void
  */
-void barrierInit(barrier *bar, unsigned noth);
+void barrierInit(barrier *bar, int noth);
 
 /* Blocks all threads from continuing Jacobi iteration
  * Input: barrier and current thread
