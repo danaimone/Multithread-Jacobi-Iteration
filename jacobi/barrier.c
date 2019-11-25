@@ -27,7 +27,6 @@ void arrive(barrier *bar, tArg *thread){
     if(thread->delta > EPSILON){
         bar->cont++;
     }
-    printf("%f \n", thread->delta);
     bar->maxThreads = 1;
     sem_post(&bar->lock);
 
