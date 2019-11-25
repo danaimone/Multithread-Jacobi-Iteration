@@ -15,12 +15,27 @@ void writeMatrixToFile(FILE *file, double (*matrix)[]);
 
 char* processArgs(int argc, char *argv[]);
 
+/*
+ * Prints the usage of the program
+ * Input:
+ *  char *argv: used for grabbing program name instead of hard coding in
+ * Output: void
+ */
 void printUsage(char *argv[]);
 
+/*
+ * Helper function: prints the contents of a matrix of doubles
+ * Input:
+ *  double matrix: matrix to be printed
+ * Output: void
+ */
 void printMatrix(double (*matrix)[]);
 
 /* Compute the values for the new matrix from the previous matrix.
- * Input: previous matrix, new matrix, and start index
+ * Input:
+ *  double (*P)[]: previous matrix
+ *  double (*N)[]: new matrix
+ *  tArg *thread: given thread
  * Output: void
  */
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
