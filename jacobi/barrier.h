@@ -27,6 +27,6 @@ void barrierInit(barrier *bar, int noth);
  * Input: barrier and current thread
  * Output: void
  */
-void arrive(barrier *bar, struct ThreadArg *thread);
+void arrive(barrier *bar, struct ThreadArg *thread, double epsilon);
 
 #endif //JACOBI_BARRIER_H

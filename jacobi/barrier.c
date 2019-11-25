@@ -8,7 +8,6 @@
 #include "barrier.h"
 #include "cthread.h"
 
-#define EPSILON 0.001
 
 void barrierInit(barrier *bar, int noth){
     bar->maxThreads = noth;
@@ -21,15 +20,14 @@ void barrierInit(barrier *bar, int noth){
 
 }
 
-void arrive(barrier *bar, tArg *thread){
+void arrive(barrier *bar, tArg *thread, double epsilon){
     sem_wait(&bar->lock);
     bar->currentThreads++;
-    if(thread->delta > EPSILON){
+    if(thread->delta > epsilon){
         bar->cont++;
     }
     bar->maxThreads = 1;
     sem_post(&bar->lock);
-
 
     if(bar->currentThreads < bar->maxThreads){
         sem_wait(&bar->done[thread->customThreadId]);

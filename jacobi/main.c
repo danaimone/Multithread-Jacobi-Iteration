@@ -14,7 +14,11 @@
 
 
 #define MATRIX_SIZE 1024
-#define NOTH 2
+/* Note: To change NOTH,
+ * Remember to change maxThreads in Arrive in barrier.c for now cause bug.
+ */
+#define NOTH 1
+#define EPSILON 0.001
 
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
@@ -29,11 +33,7 @@ int main(int argc, char *argv[]) {
         //TODO: move this to another descriptive function?
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                /* TODO: don't fscanf twice, grab the value at the input.mtx ij and set at the pointers, will potentially
-                 * be faster
-                 */
                 fscanf(fp, "%lf ", &(*previous + 1024 * i)[j]);
-                fscanf(fp, "%lf ", &(*next + 1024 * i)[j]);
             }
         }
     } else {
@@ -43,12 +43,16 @@ int main(int argc, char *argv[]) {
     }
     fclose(fp);
 
+    void *prevCopy = copyMatrix(previous);
+    next = prevCopy;
+
+
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
     barrierInit(bar, NOTH);
     threadCreate(threads, NOTH, bar);
     fp = fopen("jacobiOutput.mtx", "w");
-    writeMatrixToFile(fp, previous);
+    writeMatrixToFile(fp, next);
     fclose(fp);
     return 0;
 }
@@ -108,17 +112,12 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar) {
     sem_t lock;
     sem_init(lock, 0, 1);
     for (int i = 0; i < noth; i++) {
-        //make block struct
         tArg *threadArg = makeThreadArg(previous, next, i, &bar);
-        //TODO: start threads - &start_func (?) and tArg
         pthread_create(&threads[i], NULL, &computeJacobi, threadArg);
     }
     for (int i = 0; i < noth; i++) {
-        //TODO: Malloc error here
-
-        tArg *threadArg = malloc(sizeof(tArg));
-        pthread_join(threads[i], &threadArg);
-        //free(threadArg);
+        //TODO: change null to a struct?
+        pthread_join(threads[i], NULL);
     }
     sem_destroy(lock);
 }
@@ -130,10 +129,9 @@ void computeJacobi(void *arg) {
         sem_wait(threadArg->lock);
         computeCell(threadArg->prev, threadArg->next, threadArg);
         sem_post(threadArg->lock);
+        arrive(threadArg->bar, threadArg, EPSILON);
 
-        arrive(threadArg->bar, threadArg);
         threadArg->delta = 0;
-        //TODO: threadArg->prev = threadArg->next;
         void *newMatrix = copyMatrix(threadArg->next);
         threadArg->prev = newMatrix;
     }
@@ -151,13 +149,14 @@ tArg *makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar) {
     return threadArg;
 }
 
-void computeCell(double (*P)[], double (*N)[], tArg *thread) {
-    int i = thread->customThreadId + 1;
+void computeCell(double (*P)[MATRIX_SIZE], double (*N)[MATRIX_SIZE], tArg *thread) {
+    int i = thread->customThreadId+1;
     while (i < MATRIX_SIZE - 1) {
-        for (int j = 0; j < MATRIX_SIZE; j++) {
+        for (int j = 1; j < MATRIX_SIZE-1; j++) {
             (*N + 1024 * i)[j] = ( (*P + 1024 * (i + 1))[j] + (*P + 1024 * (i - 1))[j] +
                                    (*P + 1024 * i)[j - 1]   + (*P + 1024 * i)[j + 1] ) / 4.0;
-            double curDelta = (*P + 1024 * i)[j] - (*N + 1024 * i)[j];
+
+            double curDelta = (*N + 1024 * i)[j] - (*P + 1024 * i)[j];
             if (curDelta > thread->delta) {
                 thread->delta = curDelta;
             }

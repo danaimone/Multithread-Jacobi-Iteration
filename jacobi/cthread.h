@@ -17,4 +17,8 @@ typedef struct ThreadArg{
     double (*next)[];
 } tArg;
 
+typedef struct JoinThreadArg{
+    int passed;
+}jArg;
+
 #endif //JACOBI_CTHREAD_H
