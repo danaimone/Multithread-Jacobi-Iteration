@@ -30,8 +30,8 @@ int main(int argc, char *argv[]) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
                 // TODO: don't fscanf twice, grab the value at the input.mtx ij and set at the pointers, will potentially
                 // be faster
-                fscanf(fp, "%lf ", &(*previous+1024*i)[j]);
-                fscanf(fp, "%lf ", &(*next+1024*i)[j]);
+                fscanf(fp, "%lf ", &(*previous + 1024 * i)[j]);
+                fscanf(fp, "%lf ", &(*next + 1024 * i)[j]);
             }
         }
     } else {
@@ -56,7 +56,7 @@ void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
     if (fp != NULL) {
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                fprintf(fp, "%lf ", (*matrix+1024*i)[j]);
+                fprintf(fp, "%lf ", (*matrix + 1024 * i)[j]);
             }
         }
     } else {
@@ -69,13 +69,13 @@ void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
 void printMatrix(double (*matrix)[MATRIX_SIZE]) {
     for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
-            printf("%lf ", (*matrix+1024*i)[j]);
+            printf("%lf ", (*matrix + 1024 * i)[j]);
         }
         printf("\n");
     }
 }
 
-char* processArgs(int argc, char *argv[]) {
+char *processArgs(int argc, char *argv[]) {
     if (argc > 2) {
         printf("%s: expected 1 argument [file], but was given %d.\n", argv[0], argc - 1);
         printUsage(argv);
@@ -89,16 +89,16 @@ void printUsage(char *argv[]) {
 }
 
 
-void threadCreate(pthread_t threads[], int noth, barrier *bar){
+void threadCreate(pthread_t threads[], int noth, barrier *bar) {
     sem_t lock;
     sem_init(lock, 0, 1);
-    for(int i = 0; i < noth; i++) {
+    for (int i = 0; i < noth; i++) {
         //make block struct
         tArg *threadArg = makeThreadArg(previous, next, i, &bar);
         //TODO: start threads - &start_func (?) and tArg
         pthread_create(&threads[i], NULL, &computeJacobi, threadArg);
     }
-    for(int i = 0; i < noth; i++){
+    for (int i = 0; i < noth; i++) {
         //TODO: join threads
         tArg *threadArg;
         pthread_join(threads[i], &threadArg);
@@ -107,10 +107,10 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar){
     sem_destroy(lock);
 }
 
-void computeJacobi(void *arg){
+void computeJacobi(void *arg) {
     tArg *threadArg = arg;
 
-    while(threadArg->bar->cont) {
+    while (threadArg->bar->cont) {
         sem_wait(threadArg->lock);
         computeCell(threadArg->prev, threadArg->next, threadArg);
         sem_post(threadArg->lock);
@@ -124,7 +124,7 @@ void computeJacobi(void *arg){
     puts("exiting");
 }
 
-tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar){
+tArg *makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar) {
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
     threadArg->customThreadId = i;
     threadArg->delta = 0.0;
@@ -136,13 +136,14 @@ tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar){
     return threadArg;
 }
 
-void computeCell(double (*P)[], double (*N)[], tArg *thread){
-    int i = thread->customThreadId+1;
-    while (i < MATRIX_SIZE-1){
+void computeCell(double (*P)[], double (*N)[], tArg *thread) {
+    int i = thread->customThreadId + 1;
+    while (i < MATRIX_SIZE - 1) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
-            (*N+1024*i)[j] = ( (*P+1024*(i+1))[j] + (*P+1024*(i-1))[j] + (*P+1024*i)[j-1] + (*P+1024*i)[j+1] ) / 4.0;
-            double curDelta = (*P+1024*i)[j] - (*N+1024*i)[j];
-            if(curDelta > thread->delta){
+            (*N + 1024 * i)[j] = ((*P + 1024 * (i + 1))[j] + (*P + 1024 * (i - 1))[j] + (*P + 1024 * i)[j - 1] +
+                                  (*P + 1024 * i)[j + 1]) / 4.0;
+            double curDelta = (*P + 1024 * i)[j] - (*N + 1024 * i)[j];
+            if (curDelta > thread->delta) {
                 thread->delta = curDelta;
             }
         }
