@@ -14,7 +14,7 @@
 
 
 #define MATRIX_SIZE 1024
-#define NOTH 1
+#define NOTH 2
 
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
@@ -42,15 +42,14 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     fclose(fp);
-    //printMatrix(previous, MATRIX_SIZE);
 
-    //TODO: initialize threads
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
     barrierInit(bar, NOTH);
     threadCreate(threads, NOTH, bar);
     fp = fopen("jacobiOutput.mtx", "w");
     writeMatrixToFile(fp, previous);
+    fclose(fp);
     return 0;
 }
 
@@ -73,6 +72,7 @@ void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
                 fprintf(fp, "%lf ", (*matrix + 1024 * i)[j]);
             }
+            fprintf(fp, "\n");
         }
     } else {
         perror("fopen");
