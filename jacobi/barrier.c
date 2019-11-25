@@ -27,6 +27,7 @@ void arrive(barrier *bar, tArg *thread){
     if(thread->delta > EPSILON){
         bar->cont++;
     }
+    //printf("%d", bar->maxThreads);
     bar->maxThreads = 1;
     sem_post(&bar->lock);
 
@@ -34,7 +35,7 @@ void arrive(barrier *bar, tArg *thread){
     if(bar->currentThreads < bar->maxThreads){
         sem_wait(&bar->done[thread->customThreadId]);
     } else {
-        if(bar->cont == 8){
+        if(bar->cont == 1){
             bar->cont = 0;
         }else {
             for (int i = 0; i < bar->maxThreads; i++) {
@@ -42,7 +43,7 @@ void arrive(barrier *bar, tArg *thread){
             }
             sem_wait(&bar->done[thread->customThreadId]);
             bar->currentThreads = 0;
-            //bar->cont = 1;
+            bar->cont = 1;
         }
     }
 }
