@@ -11,11 +11,13 @@
 
 int main(int argc, char *argv[]);
 
+void writeMatrixToFile(FILE *file, double (*matrix)[]);
+
 char* processArgs(int argc, char *argv[]);
 
 void printUsage(char *argv[]);
 
-void printMatrix(double (*matrix)[], int matrixSize);
+void printMatrix(double (*matrix)[]);
 
 /* Compute the values for the new matrix from the previous matrix.
  * Input: previous matrix, new matrix, and start index

@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
-#include <getopt.h>
-#include <sys/stat.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
@@ -24,13 +22,16 @@ int main(int argc, char *argv[]) {
     FILE *fp;
     previous = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     next = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
-    char *fileName = processArgs(argc, argv);
-    fp = fopen(fileName, "r");
+    char *fName = processArgs(argc, argv);
+    fp = fopen(fName, "r");
     if (fp != NULL) {
-        //TODO: populate matrix, potentially do this another function
+        //TODO: move this to another descriptive function?
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
+                // TODO: don't fscanf twice, grab the value at the input.mtx ij and set at the pointers, will potentially
+                // be faster
                 fscanf(fp, "%lf ", &(*previous+1024*i)[j]);
+                fscanf(fp, "%lf ", &(*next+1024*i)[j]);
             }
         }
     } else {
@@ -38,20 +39,36 @@ int main(int argc, char *argv[]) {
         printUsage(argv);
         exit(EXIT_FAILURE);
     }
+    fclose(fp);
     //printMatrix(previous, MATRIX_SIZE);
 
     //TODO: initialize threads
-    pthread_t threads[NOTH];
-    barrier *bar = malloc(sizeof(barrier));
-    barrierInit(bar, NOTH);
-    threadCreate(threads, NOTH, bar);
-
+//    pthread_t threads[NOTH];
+//    barrier *bar = malloc(sizeof(barrier));
+//    barrierInit(bar, NOTH);
+//    threadCreate(threads, NOTH, bar);
+    fp = fopen("output.mtx", "w");
+    writeMatrixToFile(fp, next);
     return 0;
 }
 
-void printMatrix(double (*matrix)[MATRIX_SIZE], int matrixSize) {
-    for (int i = 0; i < matrixSize; i++) {
-        for (int j = 0; j < matrixSize; j++) {
+void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
+    if (fp != NULL) {
+        for (int i = 0; i < MATRIX_SIZE; i++) {
+            for (int j = 0; j < MATRIX_SIZE; j++) {
+                fprintf(fp, "%lf ", (*matrix+1024*i)[j]);
+            }
+        }
+    } else {
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    fclose(fp);
+}
+
+void printMatrix(double (*matrix)[MATRIX_SIZE]) {
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
             printf("%lf ", (*matrix+1024*i)[j]);
         }
         printf("\n");
