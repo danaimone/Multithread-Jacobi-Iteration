@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/Users/danaimone/CLionProjects/concurrent-jacobi-iteration/src/barrier.c" "/Users/danaimone/CLionProjects/concurrent-jacobi-iteration/cmake-build-debug/CMakeFiles/jacobi.dir/src/barrier.c.o"
-  "/Users/danaimone/CLionProjects/concurrent-jacobi-iteration/src/main.c" "/Users/danaimone/CLionProjects/concurrent-jacobi-iteration/cmake-build-debug/CMakeFiles/jacobi.dir/src/main.c.o"
+  "/Users/corbenroszak/CLionProjects/concurrent-jacobi-iteration/jacobi/barrier.c" "/Users/corbenroszak/CLionProjects/concurrent-jacobi-iteration/jacobi/cmake-build-debug/CMakeFiles/jacobi.dir/barrier.c.o"
+  "/Users/corbenroszak/CLionProjects/concurrent-jacobi-iteration/jacobi/main.c" "/Users/corbenroszak/CLionProjects/concurrent-jacobi-iteration/jacobi/cmake-build-debug/CMakeFiles/jacobi.dir/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "AppleClang")
 
