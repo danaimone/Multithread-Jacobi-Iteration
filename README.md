@@ -8,7 +8,7 @@
 ## Install
 
 ```sh
-make in cmake-build-debug/CMakeFiles
+.~/cmake-build-debug/make
 ```
 
 ## Usage
@@ -21,7 +21,8 @@ make in cmake-build-debug/CMakeFiles
 
 👤 **Dan Aimone, Corben Roszak**
 
-* Github: [@danaimone, RossoCorvo](https://github.com/danaimone, RossoCorvo)
+* Github: [@danaimone](https://github.com/danaimone)
+	  [@RossoCorvo](https://github.com/RossoCorvo)
 
 ## Show your support
 
