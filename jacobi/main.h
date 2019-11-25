@@ -13,6 +13,8 @@ int main(int argc, char *argv[]);
 
 void writeMatrixToFile(FILE *file, double (*matrix)[]);
 
+void *copyMatrix(double (*matrix)[]);
+
 char* processArgs(int argc, char *argv[]);
 
 /*

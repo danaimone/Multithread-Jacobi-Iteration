@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <string.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
@@ -50,6 +51,19 @@ int main(int argc, char *argv[]) {
     fp = fopen("output.mtx", "w");
     writeMatrixToFile(fp, next);
     return 0;
+}
+
+
+void *copyMatrix(double (*matrix)[]) {
+    double (*retMatrix)[MATRIX_SIZE];
+    retMatrix = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            double val = (*matrix + 1024 * i)[j];
+            (*retMatrix + 1024 * i)[j] = val;
+        }
+    }
+    return retMatrix;
 }
 
 void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
