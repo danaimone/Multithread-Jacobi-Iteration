@@ -43,10 +43,10 @@ int main(int argc, char *argv[]) {
     //printMatrix(previous, MATRIX_SIZE);
 
     //TODO: initialize threads
-//    pthread_t threads[NOTH];
-//    barrier *bar = malloc(sizeof(barrier));
-//    barrierInit(bar, NOTH);
-//    threadCreate(threads, NOTH, bar);
+    pthread_t threads[NOTH];
+    barrier *bar = malloc(sizeof(barrier));
+    barrierInit(bar, NOTH);
+    threadCreate(threads, NOTH, bar);
     fp = fopen("output.mtx", "w");
     writeMatrixToFile(fp, next);
     return 0;
@@ -113,10 +113,13 @@ void computeJacobi(void *arg){
     while(threadArg->bar->cont) {
         computeCell(threadArg->prev, threadArg->next, threadArg);
         arrive(threadArg->bar, threadArg);
+        //printMatrix(threadArg->next);
+        void *tempPtr = threadArg->prev;
+        threadArg->next = threadArg->prev;
+        threadArg->next = tempPtr;
     }
     sem_post(threadArg->lock);
     puts("exiting");
-
 }
 
 tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar){
