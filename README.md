@@ -22,7 +22,7 @@
 👤 **Dan Aimone, Corben Roszak**
 
 * Github: [@danaimone](https://github.com/danaimone),
-	  [@RossoCorvo](https://github.com/RossoCorvo)
+	  [@roszakc](https://github.com/roszakc)
 
 ## Show your support
 
