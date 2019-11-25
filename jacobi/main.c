@@ -109,16 +109,19 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar){
 
 void computeJacobi(void *arg){
     tArg *threadArg = arg;
-    sem_wait(threadArg->lock);
+
     while(threadArg->bar->cont) {
+        sem_wait(threadArg->lock);
         computeCell(threadArg->prev, threadArg->next, threadArg);
+        sem_post(threadArg->lock);
         arrive(threadArg->bar, threadArg);
+        threadArg->delta = 0;
         //printMatrix(threadArg->next);
+
         void *tempPtr = threadArg->prev;
-        threadArg->next = threadArg->prev;
+        threadArg->prev = threadArg->next;
         threadArg->next = tempPtr;
     }
-    sem_post(threadArg->lock);
     puts("exiting");
 }
 
@@ -136,10 +139,9 @@ tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar){
 
 void computeCell(double (*P)[], double (*N)[], tArg *thread){
     int i = thread->customThreadId+1;
-    while (i < MATRIX_SIZE){
+    while (i < MATRIX_SIZE-1){
         for (int j = 0; j < MATRIX_SIZE; j++) {
             (*N+1024*i)[j] = ( (*P+1024*(i+1))[j] + (*P+1024*(i-1))[j] + (*P+1024*i)[j-1] + (*P+1024*i)[j+1] ) / 4.0;
-
             double curDelta = (*P+1024*i)[j] - (*N+1024*i)[j];
             if(curDelta > thread->delta){
                 thread->delta = curDelta;
