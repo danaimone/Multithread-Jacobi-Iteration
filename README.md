@@ -8,7 +8,7 @@
 ## Install
 
 ```sh
-.~/cmake-build-debug/make
+./cmake-build-debug/make
 ```
 
 ## Usage
@@ -21,12 +21,11 @@
 
 👤 **Dan Aimone, Corben Roszak**
 
-* Github: [@danaimone](https://github.com/danaimone)
-	  [@RossoCorvo](https://github.com/RossoCorvo)
+* Github: [@danaimone](https://github.com/danaimone),
+	  [@roszakc](https://github.com/roszakc)
 
 ## Show your support
 
 Give a ⭐️ if this project helped you!
 
 ***
-_This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_

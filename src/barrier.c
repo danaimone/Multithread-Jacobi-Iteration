@@ -10,14 +10,13 @@
 
 
 void barrierInit(barrier *bar, int noth){
-    bar->maxThreads = noth;
     bar->currentThreads = 0;
     bar->cont = 1;
+    bar->maxThreads = noth;
     for (int i = 0; i < noth; i++) {
         sem_init(&bar->done[i], 0, 1);
     }
     sem_init(&bar->lock, 0, 1);
-
 }
 
 void arrive(barrier *bar, tArg *thread, double epsilon){
@@ -26,7 +25,6 @@ void arrive(barrier *bar, tArg *thread, double epsilon){
     if(thread->delta > epsilon){
         bar->cont++;
     }
-    bar->maxThreads = 1;
     sem_post(&bar->lock);
 
     if(bar->currentThreads < bar->maxThreads){

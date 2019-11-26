@@ -11,9 +11,9 @@
 
 typedef struct Barrier {
     sem_t lock;
-    int maxThreads;
     int currentThreads;
     int cont;
+    int maxThreads;
     sem_t done[];
 } barrier;
 
