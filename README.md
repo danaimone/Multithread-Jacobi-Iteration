@@ -8,7 +8,8 @@
 ## Install
 
 ```sh
-./cmake-build-debug/make
+$ cd cmake-build-debug
+$ make
 ```
 
 ## Usage
