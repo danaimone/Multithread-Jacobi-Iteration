@@ -14,10 +14,7 @@
 
 
 #define MATRIX_SIZE 1024
-/* Note: To change NOTH,
- * Remember to change maxThreads in Arrive in barrier.c for now cause bug.
- */
-#define NOTH 1
+#define NOTH 4
 #define EPSILON 0.001
 
 double (*previous)[MATRIX_SIZE];
@@ -30,10 +27,9 @@ int main(int argc, char *argv[]) {
     char *fName = processArgs(argc, argv);
     fp = fopen(fName, "r");
     if (fp != NULL) {
-        //TODO: move this to another descriptive function?
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                fscanf(fp, "%lf ", &(*previous + 1024 * i)[j]);
+                fscanf(fp, "%lf ", &(*next + 1024 * i)[j]);
             }
         }
     } else {
@@ -43,14 +39,13 @@ int main(int argc, char *argv[]) {
     }
     fclose(fp);
 
-    void *prevCopy = copyMatrix(previous);
-    next = prevCopy;
-
+    copyMatrix(next);
 
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
     barrierInit(bar, NOTH);
     threadCreate(threads, NOTH, bar);
+
     fp = fopen("jacobiOutput.mtx", "w");
     writeMatrixToFile(fp, next);
     fclose(fp);
@@ -58,23 +53,22 @@ int main(int argc, char *argv[]) {
 }
 
 
-void *copyMatrix(double (*matrix)[]) {
-    double (*retMatrix)[MATRIX_SIZE];
-    retMatrix = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
+void copyMatrix(double (*matrix)[]) {
+    //double (*retMatrix)[MATRIX_SIZE];
+    //retMatrix = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             double val = (*matrix + 1024 * i)[j];
-            (*retMatrix + 1024 * i)[j] = val;
+            (*previous + 1024 * i)[j] = val;
         }
     }
-    return retMatrix;
 }
 
 void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
     if (fp != NULL) {
         for (int i = 0; i < MATRIX_SIZE; i++) {
             for (int j = 0; j < MATRIX_SIZE; j++) {
-                fprintf(fp, "%lf ", (*matrix + 1024 * i)[j]);
+                fprintf(fp, "%.10lf ", (*matrix + 1024 * i)[j]);
             }
             fprintf(fp, "\n");
         }
@@ -126,24 +120,26 @@ void computeJacobi(void *arg) {
     tArg *threadArg = arg;
 
     while (threadArg->bar->cont) {
-        sem_wait(threadArg->lock);
         computeCell(threadArg->prev, threadArg->next, threadArg);
-        sem_post(threadArg->lock);
         arrive(threadArg->bar, threadArg, EPSILON);
-
         threadArg->delta = 0;
-        void *newMatrix = copyMatrix(threadArg->next);
-        threadArg->prev = newMatrix;
+
+        //TODO: this is the shared state. fix the barrier here
+        sem_wait(threadArg->lock);
+
+        copyMatrix(threadArg->next);
+
+        sem_post(threadArg->lock);
     }
 }
 
-tArg *makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar) {
+tArg *makeThreadArg(double(*prev)[], double(*nextt)[], int i, barrier *bar) {
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
     threadArg->customThreadId = i;
     threadArg->delta = 0.0;
-    threadArg->lock = bar->done[i];
+    threadArg->lock = &bar->done[i];
     threadArg->next = next;
-    threadArg->prev = prev;
+    threadArg->prev = previous;
     threadArg->bar = bar;
 
     return threadArg;
