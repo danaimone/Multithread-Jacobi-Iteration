@@ -14,6 +14,7 @@ int main(int argc, char *argv[]);
 void writeMatrixToFile(FILE *file, double (*matrix)[]);
 
 void copyMatrix(double (*matrix)[]);
+void swapMatrix();
 
 char* processArgs(int argc, char *argv[]);
 

@@ -53,9 +53,16 @@ int main(int argc, char *argv[]) {
 }
 
 
+void swapMatrix(){
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            double val = (*next + 1024 * i)[j];
+            (*previous + 1024 * i)[j] = val;
+        }
+    }
+}
+
 void copyMatrix(double (*matrix)[]) {
-    //double (*retMatrix)[MATRIX_SIZE];
-    //retMatrix = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             double val = (*matrix + 1024 * i)[j];
@@ -103,33 +110,26 @@ void printUsage(char *argv[]) {
 
 
 void threadCreate(pthread_t threads[], int noth, barrier *bar) {
-    sem_t lock;
-    sem_init(lock, 0, 1);
     for (int i = 0; i < noth; i++) {
-        tArg *threadArg = makeThreadArg(previous, next, i, &bar);
-        pthread_create(&threads[i], NULL, &computeJacobi, threadArg);
+        tArg *threadArg = makeThreadArg(previous, next, i, bar);
+        pthread_create(&threads[i], NULL, computeJacobi, threadArg);
     }
+
     for (int i = 0; i < noth; i++) {
         //TODO: change null to a struct?
         pthread_join(threads[i], NULL);
     }
-    sem_destroy(lock);
 }
 
 void computeJacobi(void *arg) {
     tArg *threadArg = arg;
-
+    //TODO: some issue where the threads are not blocking at all.
     while (threadArg->bar->cont) {
-        computeCell(threadArg->prev, threadArg->next, threadArg);
+        sem_post(&threadArg->bar->done[threadArg->customThreadId]);
+        computeCell(*threadArg->prev, *threadArg->next, threadArg);
         arrive(threadArg->bar, threadArg, EPSILON);
-        threadArg->delta = 0;
-
-        //TODO: this is the shared state. fix the barrier here
-        sem_wait(threadArg->lock);
-
-        copyMatrix(threadArg->next);
-
-        sem_post(threadArg->lock);
+        sem_wait(&threadArg->bar->done[threadArg->customThreadId]);
+        threadArg->delta = 0.0;
     }
 }
 
@@ -138,8 +138,8 @@ tArg *makeThreadArg(double(*prev)[], double(*nextt)[], int i, barrier *bar) {
     threadArg->customThreadId = i;
     threadArg->delta = 0.0;
     threadArg->lock = &bar->done[i];
-    threadArg->next = next;
-    threadArg->prev = previous;
+    threadArg->next = &next;
+    threadArg->prev = &previous;
     threadArg->bar = bar;
 
     return threadArg;

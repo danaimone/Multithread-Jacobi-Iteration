@@ -13,12 +13,8 @@ typedef struct ThreadArg{
     struct Barrier *bar;
     int customThreadId;
     double delta;
-    double (*prev)[];
-    double (*next)[];
+    double (**prev)[];
+    double (**next)[];
 } tArg;
-
-typedef struct JoinThreadArg{
-    int passed;
-}jArg;
 
 #endif //JACOBI_CTHREAD_H
