@@ -14,6 +14,7 @@ $ ./install.sh
 ## Usage
 
 ```sh
+cd Release/
 ./jacobi [filename]
 ```
 
