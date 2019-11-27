@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <string.h>
+#include <zconf.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
@@ -15,7 +16,7 @@
 
 #define MATRIX_SIZE 1024
 #define NOTH 4
-#define EPSILON 0.001
+#define EPSILON 0.00001
 
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
@@ -114,7 +115,7 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar) {
         tArg *threadArg = makeThreadArg(previous, next, i, bar);
         pthread_create(&threads[i], NULL, computeJacobi, threadArg);
     }
-
+    sleep(1);
     for (int i = 0; i < noth; i++) {
         //TODO: change null to a struct?
         pthread_join(threads[i], NULL);
@@ -123,12 +124,9 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar) {
 
 void computeJacobi(void *arg) {
     tArg *threadArg = arg;
-    //TODO: some issue where the threads are not blocking at all.
     while (threadArg->bar->cont) {
-        sem_post(&threadArg->bar->done[threadArg->customThreadId]);
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
         arrive(threadArg->bar, threadArg, EPSILON);
-        sem_wait(&threadArg->bar->done[threadArg->customThreadId]);
         threadArg->delta = 0.0;
     }
 }
