@@ -23,6 +23,8 @@ typedef struct Barrier {
  */
 void barrierInit(barrier *bar, int noth);
 
+void freeBarrier(barrier *bar);
+
 /* Blocks all threads from continuing Jacobi iteration
  * Input: barrier and current thread
  * Output: void

@@ -42,7 +42,7 @@ void printMatrix(double (*matrix)[]);
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
 tArg* makeThreadArg(int i, barrier *bar);
-void computeJacobi(void *threadArg);
+tArg* computeJacobi(void *threadArg);
 
 /* create the given number of threads
  * Input: number of threads

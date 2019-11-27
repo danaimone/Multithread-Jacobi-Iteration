@@ -16,7 +16,7 @@
 
 #define MATRIX_SIZE 1024
 #define NOTH 4
-#define EPSILON 0.00001
+#define EPSILON 0.01
 
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
@@ -53,7 +53,9 @@ int main(int argc, char *argv[]) {
     fclose(fp);
     free(previous);
     free(next);
-    free(bar);
+    freeBarrier(bar);
+    //TODO: bar no longer needs/can be freed?
+    //free(bar);
     return 0;
 }
 
@@ -121,18 +123,20 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar) {
     }
 
     for (int i = 0; i < noth; i++) {
-        //TODO: change null to a struct?
-        pthread_join(threads[i], NULL);
+        tArg *retArg;
+        pthread_join(threads[i], &retArg);
+        free(retArg);
     }
 }
 
-void computeJacobi(void *arg) {
+tArg* computeJacobi(void *arg) {
     tArg *threadArg = arg;
     while (threadArg->bar->cont) {
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
         arrive(threadArg->bar, threadArg, EPSILON);
         threadArg->delta = 0.0;
     }
+    return threadArg;
 }
 
 tArg *makeThreadArg(int i, barrier *bar) {

@@ -22,6 +22,11 @@ void barrierInit(barrier *bar, int noth){
     sem_init(&bar->lock, 0, 1);
 }
 
+void freeBarrier(barrier *bar){
+    free(&bar->lock);
+    free(bar->done);
+}
+
 void arrive(barrier *bar, tArg *thread, double epsilon){
     sem_wait(&bar->lock);
     bar->currentThreads++;
