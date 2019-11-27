@@ -2,3 +2,4 @@
 jacobi/
 cmake-build-debug/
 .DS_Store
+Release/
