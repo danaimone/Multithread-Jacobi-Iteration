@@ -10,12 +10,10 @@
 #include "src/barrier.h"
 
 int main(int argc, char *argv[]);
-
+void fileToMatrix(FILE *file, double (*matrix)[], char *argv[]);
 void writeMatrixToFile(FILE *file, double (*matrix)[]);
-
 void copyMatrix(double (*matrix)[]);
 void swapMatrix();
-
 char* processArgs(int argc, char *argv[]);
 
 /*
@@ -43,7 +41,7 @@ void printMatrix(double (*matrix)[]);
  */
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
-tArg* makeThreadArg(double(*prev)[], double(*next)[], int i, barrier *bar);
+tArg* makeThreadArg(int i, barrier *bar);
 void computeJacobi(void *threadArg);
 
 /* create the given number of threads

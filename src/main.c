@@ -49,7 +49,11 @@ int main(int argc, char *argv[]) {
 
     fp = fopen("jacobiOutput.mtx", "w");
     writeMatrixToFile(fp, next);
+
     fclose(fp);
+    free(previous);
+    free(next);
+    free(bar);
     return 0;
 }
 
@@ -112,10 +116,10 @@ void printUsage(char *argv[]) {
 
 void threadCreate(pthread_t threads[], int noth, barrier *bar) {
     for (int i = 0; i < noth; i++) {
-        tArg *threadArg = makeThreadArg(previous, next, i, bar);
+        tArg *threadArg = makeThreadArg(i, bar);
         pthread_create(&threads[i], NULL, computeJacobi, threadArg);
     }
-    sleep(1);
+
     for (int i = 0; i < noth; i++) {
         //TODO: change null to a struct?
         pthread_join(threads[i], NULL);
@@ -131,7 +135,7 @@ void computeJacobi(void *arg) {
     }
 }
 
-tArg *makeThreadArg(double(*prev)[], double(*nextt)[], int i, barrier *bar) {
+tArg *makeThreadArg(int i, barrier *bar) {
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
     threadArg->customThreadId = i;
     threadArg->delta = 0.0;
