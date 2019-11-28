@@ -23,8 +23,8 @@ void barrierInit(barrier *bar, int noth){
 }
 
 void freeBarrier(barrier *bar){
-    free(&bar->lock);
     free(bar->done);
+    free(&bar->lock);
 }
 
 void arrive(barrier *bar, tArg *thread, double epsilon){

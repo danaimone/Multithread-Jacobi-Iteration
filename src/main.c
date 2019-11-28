@@ -16,7 +16,7 @@
 
 #define MATRIX_SIZE 1024
 #define NOTH 4
-#define EPSILON 0.01
+#define EPSILON 0.0001
 
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
@@ -25,19 +25,11 @@ int main(int argc, char *argv[]) {
     FILE *fp;
     previous = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     next = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
+
+
     char *fName = processArgs(argc, argv);
     fp = fopen(fName, "r");
-    if (fp != NULL) {
-        for (int i = 0; i < MATRIX_SIZE; i++) {
-            for (int j = 0; j < MATRIX_SIZE; j++) {
-                fscanf(fp, "%lf ", &(*next + 1024 * i)[j]);
-            }
-        }
-    } else {
-        perror("fopen");
-        printUsage(argv);
-        exit(EXIT_FAILURE);
-    }
+    fileToMatrix(fp, next, argv);
     fclose(fp);
 
     copyMatrix(next);
@@ -54,11 +46,22 @@ int main(int argc, char *argv[]) {
     free(previous);
     free(next);
     freeBarrier(bar);
-    //TODO: bar no longer needs/can be freed?
-    //free(bar);
     return 0;
 }
 
+void fileToMatrix(FILE *file, double (*matrix)[], char *programArgs[]) {
+    if (file != NULL) {
+        for (int i = 0; i < MATRIX_SIZE; i++) {
+            for (int j = 0; j < MATRIX_SIZE; j++) {
+                fscanf(file, "%lf ", &(*matrix + 1024 * i)[j]);
+            }
+        }
+    } else {
+        perror("fopen");
+        printUsage(programArgs);
+        exit(EXIT_FAILURE);
+    }
+}
 
 void swapMatrix(){
     for (int i = 0; i < MATRIX_SIZE; i++) {
@@ -157,7 +160,6 @@ void computeCell(double (*P)[MATRIX_SIZE], double (*N)[MATRIX_SIZE], tArg *threa
         for (int j = 1; j < MATRIX_SIZE-1; j++) {
             (*N + 1024 * i)[j] = ( (*P + 1024 * (i + 1))[j] + (*P + 1024 * (i - 1))[j] +
                                    (*P + 1024 * i)[j - 1]   + (*P + 1024 * i)[j + 1] ) / 4.0;
-
             double curDelta = (*N + 1024 * i)[j] - (*P + 1024 * i)[j];
             if (curDelta > thread->delta) {
                 thread->delta = curDelta;
