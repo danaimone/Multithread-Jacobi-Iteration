@@ -16,7 +16,7 @@
 
 
 #define MATRIX_SIZE 1024
-#define EPSILON 0.01
+double EPSILON = 0.0001;
 
 static int printTimeFlag = 0;
 int NOTH = 1;
@@ -114,11 +114,12 @@ char *processArgs(int argc, char *argv[]) {
                 {
                         {"time",    no_argument,       &printTimeFlag, 1},
                         {"threads", required_argument, 0,              't'},
+                        {"epsilon", required_argument, 0,              'e'},
                         {0, 0,                         0,              0}
                 };
 
         int optionIndex = 0;
-        opt = getopt_long(argc, argv, "t:", longOptions, &optionIndex);
+        opt = getopt_long(argc, argv, "t:e:", longOptions, &optionIndex);
         if (opt == -1)
             break;
 
@@ -134,6 +135,10 @@ char *processArgs(int argc, char *argv[]) {
 
             case 't':
                 NOTH = atoi(optarg);
+                break;
+
+            case 'e':
+                EPSILON = strtod(optarg, NULL);
                 break;
 
             case '?':
