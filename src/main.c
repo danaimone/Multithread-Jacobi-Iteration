@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
-#include <string.h>
 #include <zconf.h>
+#include <time.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
@@ -22,6 +22,8 @@ double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
 
 int main(int argc, char *argv[]) {
+    time_t start, end;
+    time(&start);
     FILE *fp;
     previous = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     next = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
@@ -46,6 +48,13 @@ int main(int argc, char *argv[]) {
     free(previous);
     free(next);
     freeBarrier(bar);
+    time(&end);
+    double timeTaken = (double) end - start;
+    int hours = (timeTaken / 3600);
+    int minutes = (timeTaken - (3600 * hours)) / 60;
+    int seconds = (timeTaken - (3600 * hours) - (minutes * 60));
+
+    printf("Execution time: %d hrs %d minutes %d seconds", hours, minutes, seconds);
     return 0;
 }
 
