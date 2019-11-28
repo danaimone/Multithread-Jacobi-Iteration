@@ -19,10 +19,13 @@ int main(int argc, char *argv[]);
  *  char *argv[]: command line arguments, used for printing
  * Output: void
  */
-void fileToMatrix(FILE *file, double (*matrix)[], char* programArgs[]);
+void fileToMatrix(FILE *file, double (*matrix)[], char *programArgs[]);
+
 void writeMatrixToFile(FILE *file, double (*matrix)[]);
-void swapMatrix();
-char* processArgs(int argc, char *argv[]);
+
+void swapMatrix(double (*source)[], double (*dest)[]);
+
+char *processArgs(int argc, char *argv[]);
 
 /*
  * Prints the usage of the program
@@ -49,13 +52,14 @@ void printMatrix(double (*matrix)[]);
  */
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
-tArg* makeThreadArg(int i, barrier *bar);
-tArg* computeJacobi(void *threadArg);
+tArg *makeThreadArg(int i, barrier *bar);
+
+tArg *computeJacobi(void *threadArg);
 
 /* create the given number of threads
  * Input: number of threads
  * Output: void
  */
-void threadCreate(pthread_t threads[], int noth, barrier *bar);
+void createThread(pthread_t *threads, int noth, barrier *bar);
 
 #endif //JACOBI_MAIN_H

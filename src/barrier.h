@@ -21,7 +21,7 @@ typedef struct Barrier {
  * Input: barrier object and number of threads
  * Output: void
  */
-void barrierInit(barrier *bar, int noth);
+void initBarrier(barrier *bar, int noth);
 
 void freeBarrier(barrier *bar);
 

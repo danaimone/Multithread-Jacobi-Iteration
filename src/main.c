@@ -32,12 +32,12 @@ int main(int argc, char *argv[]) {
     fileToMatrix(fp, next, argv);
     fclose(fp);
 
-    swapMatrix(next);
+    swapMatrix(next, previous);
 
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
-    barrierInit(bar, NOTH);
-    threadCreate(threads, NOTH, bar);
+    initBarrier(bar, NOTH);
+    createThread(threads, NOTH, bar);
 
     fp = fopen("jacobiOutput.mtx", "w");
     writeMatrixToFile(fp, next);
@@ -63,11 +63,11 @@ void fileToMatrix(FILE *file, double (*matrix)[], char *programArgs[]) {
     }
 }
 
-void swapMatrix(){
+void swapMatrix(double (*source)[], double (*dest)[]) {
     for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
-            double val = (*next + 1024 * i)[j];
-            (*previous + 1024 * i)[j] = val;
+            double val = (*source + 1024 * i)[j];
+            (*dest + 1024 * i)[j] = val;
         }
     }
 }
@@ -110,7 +110,7 @@ void printUsage(char *argv[]) {
 }
 
 
-void threadCreate(pthread_t threads[], int noth, barrier *bar) {
+void createThread(pthread_t *threads, int noth, barrier *bar) {
     for (int i = 0; i < noth; i++) {
         tArg *threadArg = makeThreadArg(i, bar);
         pthread_create(&threads[i], NULL, computeJacobi, threadArg);
@@ -123,7 +123,7 @@ void threadCreate(pthread_t threads[], int noth, barrier *bar) {
     }
 }
 
-tArg* computeJacobi(void *arg) {
+tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
     while (threadArg->bar->cont) {
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
@@ -146,11 +146,11 @@ tArg *makeThreadArg(int i, barrier *bar) {
 }
 
 void computeCell(double (*P)[MATRIX_SIZE], double (*N)[MATRIX_SIZE], tArg *thread) {
-    int i = thread->customThreadId+1;
+    int i = thread->customThreadId + 1;
     while (i < MATRIX_SIZE - 1) {
-        for (int j = 1; j < MATRIX_SIZE-1; j++) {
-            (*N + 1024 * i)[j] = ( (*P + 1024 * (i + 1))[j] + (*P + 1024 * (i - 1))[j] +
-                                   (*P + 1024 * i)[j - 1]   + (*P + 1024 * i)[j + 1] ) / 4.0;
+        for (int j = 1; j < MATRIX_SIZE - 1; j++) {
+            (*N + 1024 * i)[j] = ((*P + 1024 * (i + 1))[j] + (*P + 1024 * (i - 1))[j] +
+                                  (*P + 1024 * i)[j - 1] + (*P + 1024 * i)[j + 1]) / 4.0;
             double curDelta = (*N + 1024 * i)[j] - (*P + 1024 * i)[j];
             if (curDelta > thread->delta) {
                 thread->delta = curDelta;

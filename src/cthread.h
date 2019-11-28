@@ -4,11 +4,12 @@
 
 #ifndef JACOBI_CTHREAD_H
 #define JACOBI_CTHREAD_H
+
 #include "src/barrier.h"
 #include <pthread.h>
 #include <semaphore.h>
 
-typedef struct ThreadArg{
+typedef struct ThreadArg {
     sem_t *lock;
     struct Barrier *bar;
     int customThreadId;
