@@ -2,6 +2,10 @@
  * CSCI 347
  * Jacobi Matrix Multi Threaded Project
  * Version 1.0
+ * Usage: --time : display elapsed time
+ *        -e n : set epsilon
+ *        -t n : set number of threads
+ *
  */
 
 #include <stdio.h>
@@ -96,15 +100,6 @@ void writeMatrixToFile(FILE *fp, double (*matrix)[MATRIX_SIZE]) {
         exit(EXIT_FAILURE);
     }
     fclose(fp);
-}
-
-void printMatrix(double (*matrix)[MATRIX_SIZE]) {
-    for (int i = 0; i < MATRIX_SIZE; i++) {
-        for (int j = 0; j < MATRIX_SIZE; j++) {
-            printf("%lf ", (*matrix + 1024 * i)[j]);
-        }
-        printf("\n");
-    }
 }
 
 char *processArgs(int argc, char *argv[]) {

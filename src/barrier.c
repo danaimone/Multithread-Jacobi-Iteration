@@ -42,6 +42,7 @@ void arrive(barrier *bar, tArg *thread, double epsilon) {
             bar->cont = 0;
         } else {
             swapMatrix(*thread->next, *thread->prev);
+
             for (int i = 0; i < bar->maxThreads; i++) {
                 sem_post(&bar->done[i]);
             }
