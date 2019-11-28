@@ -16,7 +16,7 @@
 
 
 #define MATRIX_SIZE 1024
-double EPSILON = 0.0001;
+double EPSILON = 0.00001;
 
 static int printTimeFlag = 0;
 int NOTH = 1;
