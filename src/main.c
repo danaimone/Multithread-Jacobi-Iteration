@@ -9,15 +9,17 @@
 #include <semaphore.h>
 #include <zconf.h>
 #include <time.h>
+#include <getopt.h>
 #include "main.h"
 #include "cthread.h"
 #include "barrier.h"
 
 
 #define MATRIX_SIZE 1024
-#define NOTH 4
-#define EPSILON 0.0001
+#define EPSILON 0.01
 
+static int printTimeFlag = 0;
+int NOTH = 1;
 double (*previous)[MATRIX_SIZE];
 double (*next)[MATRIX_SIZE];
 
@@ -27,7 +29,6 @@ int main(int argc, char *argv[]) {
     FILE *fp;
     previous = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
     next = malloc(sizeof(double) * MATRIX_SIZE * MATRIX_SIZE);
-
 
     char *fName = processArgs(argc, argv);
     fp = fopen(fName, "r");
@@ -49,12 +50,13 @@ int main(int argc, char *argv[]) {
     free(next);
     freeBarrier(bar);
     time(&end);
-    double timeTaken = (double) end - start;
-    int hours = (timeTaken / 3600);
-    int minutes = (timeTaken - (3600 * hours)) / 60;
-    int seconds = (timeTaken - (3600 * hours) - (minutes * 60));
-
-    printf("Execution time: %d hrs %d minutes %d seconds", hours, minutes, seconds);
+    if (printTimeFlag) {
+        double timeTaken = (double) end - start;
+        int hours = (timeTaken / 3600);
+        int minutes = (timeTaken - (3600 * hours)) / 60;
+        int seconds = (timeTaken - (3600 * hours) - (minutes * 60));
+        printf("Execution time: %d hrs %d minutes %d seconds", hours, minutes, seconds);
+    }
     return 0;
 }
 
@@ -106,11 +108,42 @@ void printMatrix(double (*matrix)[MATRIX_SIZE]) {
 }
 
 char *processArgs(int argc, char *argv[]) {
-    if (argc > 2) {
-        printf("%s: expected 1 argument [file], but was given %d.\n", argv[0], argc - 1);
-        printUsage(argv);
-        exit(EXIT_FAILURE);
+    int opt;
+    while (optind < argc) {
+        static struct option longOptions[] =
+                {
+                        {"time",    no_argument,       &printTimeFlag, 1},
+                        {"threads", required_argument, 0,              't'},
+                        {0, 0,                         0,              0}
+                };
+
+        int optionIndex = 0;
+        opt = getopt_long(argc, argv, "t:", longOptions, &optionIndex);
+        if (opt == -1)
+            break;
+
+        switch (opt) {
+            case 0:
+                if (longOptions[optionIndex].flag != 0)
+                    break;
+                printf("option %s", longOptions[optionIndex].name);
+                if (optarg)
+                    printf(" with arg %s", optarg);
+                printf("\n");
+                break;
+
+            case 't':
+                NOTH = atoi(optarg);
+                break;
+
+            case '?':
+                break;
+
+            default:
+                abort();
+        }
     }
+
     return argv[1];
 }
 
