@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     }
     fclose(fp);
 
-    copyMatrix(next);
+    swapMatrix(next);
 
     pthread_t threads[NOTH];
     barrier *bar = malloc(sizeof(barrier));
@@ -64,15 +64,6 @@ void swapMatrix(){
     for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
             double val = (*next + 1024 * i)[j];
-            (*previous + 1024 * i)[j] = val;
-        }
-    }
-}
-
-void copyMatrix(double (*matrix)[]) {
-    for (int i = 0; i < MATRIX_SIZE; i++) {
-        for (int j = 0; j < MATRIX_SIZE; j++) {
-            double val = (*matrix + 1024 * i)[j];
             (*previous + 1024 * i)[j] = val;
         }
     }
