@@ -12,7 +12,7 @@
 
 void initBarrier(barrier *bar, int noth) {
     bar->currentThreads = 0;
-    bar->cont = 1;
+    bar->continueIteration = 1;
     bar->maxThreads = noth;
     bar->lock = (sem_t) malloc(sizeof(sem_t));
     bar->done[noth] = (sem_t) malloc(sizeof(sem_t) * noth);
@@ -30,17 +30,19 @@ void freeBarrier(barrier *bar) {
 void arrive(barrier *bar, tArg *thread, double epsilon) {
     sem_wait(&bar->lock);
     bar->currentThreads++;
+    //TODO: maybe do this differently?
     if (thread->delta > epsilon) {
-        bar->cont++;
+        bar->continueIteration = 2;
     }
     sem_post(&bar->lock);
 
     if (bar->currentThreads < bar->maxThreads) {
         sem_wait(&bar->done[thread->customThreadId]);
     } else {
-        if (bar->cont == 1) {
-            bar->cont = 0;
+        if (bar->continueIteration == 1) {
+            bar->continueIteration = 0;
         } else {
+            //TODO: make this a rendezvous for the threads.
             swapMatrix(*thread->next, *thread->prev);
 
             for (int i = 0; i < bar->maxThreads; i++) {
@@ -48,7 +50,7 @@ void arrive(barrier *bar, tArg *thread, double epsilon) {
             }
             sem_wait(&bar->done[thread->customThreadId]);
             bar->currentThreads = 0;
-            bar->cont = 1;
+            bar->continueIteration = 1;
         }
     }
 }

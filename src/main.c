@@ -167,7 +167,7 @@ void createThread(pthread_t *threads, int noth, barrier *bar) {
 
 tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
-    while (threadArg->bar->cont) {
+while (threadArg->bar->continueIteration != 0) {
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
         arrive(threadArg->bar, threadArg, EPSILON);
         threadArg->delta = 0.0;

@@ -12,7 +12,7 @@
 typedef struct Barrier {
     sem_t lock;
     int currentThreads;
-    int cont;
+    int continueIteration;
     int maxThreads;
     sem_t done[];
 } barrier;
