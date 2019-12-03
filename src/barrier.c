@@ -14,39 +14,31 @@ void initBarrier(barrier *bar, int noth) {
     bar->currentThreads = 0;
     bar->continueIteration = 1;
     bar->maxThreads = noth;
-    bar->toSwap = 1;
     bar->lock = (sem_t) malloc(sizeof(sem_t));
-    sem_init(&bar->lock, 0, 1);
+    sem_post(&bar->lock);
     bar->done[noth] = (sem_t) malloc(sizeof(sem_t) * noth);
     for (int i = 0; i < noth; i++) {
-        sem_init(&bar->done[i], 0, 1);
+        sem_post(&bar->done[i]);
     }
 }
 
 void freeBarrier(barrier *bar) {
     free(&bar->lock);
-    //free(bar->done);
+    free(bar->done);
 }
 
-void arrive(barrier *bar, tArg *thread) {
+void arrive(barrier *bar, tArg *thread, double epsilon) {
     sem_wait(&bar->lock);
     bar->currentThreads++;
     sem_post(&bar->lock);
 
     if (bar->currentThreads < bar->maxThreads) {
-        sem_wait(&bar->done[thread->customThreadId]);
+        sem_wait(thread->lock);
     } else {
-        if (bar->continueIteration == 1) {
-            bar->continueIteration = 0;
-        } else {
-            swapMatrix(*thread->next, *thread->prev);
-            for (int i = 0; i < bar->maxThreads; i++) {
-                sem_post(&bar->done[i]);
-            }
-            sem_wait(&bar->done[thread->customThreadId]);
-            bar->currentThreads = 0;
-            bar->continueIteration = 1;
-            bar->toSwap = 1;
+        bar->currentThreads = 0;
+        for (int i = 0; i < bar->maxThreads; i++) {
+            sem_post(&bar->done[i]);
         }
+        sem_wait(thread->lock);
     }
 }

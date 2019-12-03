@@ -153,8 +153,10 @@ void printUsage(char *argv[]) {
 
 
 void createThread(pthread_t *threads, int noth, barrier *bar) {
+    sem_t *lock = malloc(sizeof(sem_t));
+    sem_post(lock);
     for (int i = 0; i < noth; i++) {
-        tArg *threadArg = makeThreadArg(i, bar);
+        tArg *threadArg = makeThreadArg(i, bar, lock);
         pthread_create(&threads[i], NULL, computeJacobi, threadArg);
     }
 
@@ -168,45 +170,43 @@ void createThread(pthread_t *threads, int noth, barrier *bar) {
 tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
     while (threadArg->bar->continueIteration != 0) {
+        arrive(threadArg->bar, threadArg, EPSILON);
+
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
         epsilonCheck(EPSILON, threadArg, threadArg->bar);
-        arrive(threadArg->bar, threadArg);
-        //updateMatrix(threadArg->bar, threadArg);
-        threadArg->delta = 0.0;
+
+        arrive(threadArg->bar, threadArg, EPSILON);
+
+        if(threadArg->customThreadId == 0){
+            swapMatrix(*threadArg->next, *threadArg->prev);
+            continueIteration(threadArg->bar);
+        }
+        arrive(threadArg->bar, threadArg, EPSILON);
     }
     return threadArg;
 }
 
-//TODO: fix this to make it work. Should be some sort of rendezvous.
-void updateMatrix(barrier *bar, tArg *thread){
-    sem_wait(&bar->lock);
-    bar->currentThreads++;
-    sem_post(&bar->lock);
-
-    if (bar->currentThreads < bar->maxThreads) {
-        sem_wait(&bar->done[thread->customThreadId]);
+void continueIteration(barrier *bar){
+    if(bar->continueIteration == 1){
+        bar->continueIteration = 0;
     } else {
-        swapMatrix(*thread->next, *thread->prev);
-        for (int i = 0; i < bar->maxThreads; i++) {
-            sem_post(&bar->done[i]);
-        }
-        sem_wait(&bar->done[thread->customThreadId]);
-        bar->currentThreads = 0;
+        bar->continueIteration = 1;
     }
 }
 
 void epsilonCheck(double epsilon, tArg *thread, barrier *bar){
-    sem_wait(&bar->lock);
+    sem_wait(thread->threadLock);
     if(thread->delta > epsilon){
         bar->continueIteration = 2;
     }
-    sem_post(&bar->lock);
+    sem_post(thread->threadLock);
 }
 
-tArg *makeThreadArg(int i, barrier *bar) {
+tArg *makeThreadArg(int i, barrier *bar, sem_t *lock) {
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
     threadArg->customThreadId = i;
     threadArg->delta = 0.0;
+    threadArg->threadLock = lock;
     threadArg->lock = &bar->done[i];
     threadArg->next = &next;
     threadArg->prev = &previous;
@@ -216,6 +216,7 @@ tArg *makeThreadArg(int i, barrier *bar) {
 }
 
 void computeCell(double (*P)[MATRIX_SIZE], double (*N)[MATRIX_SIZE], tArg *thread) {
+    thread->delta = 0.0;
     int i = thread->customThreadId + 1;
     while (i < MATRIX_SIZE - 1) {
         for (int j = 1; j < MATRIX_SIZE - 1; j++) {
