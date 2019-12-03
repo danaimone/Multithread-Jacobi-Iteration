@@ -52,6 +52,9 @@ void printMatrix(double (*matrix)[]);
  */
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
+void epsilonCheck(double epsilon, tArg *thread, barrier *bar);
+void updateMatrix(barrier *bar, tArg *thread);
+
 tArg *makeThreadArg(int i, barrier *bar);
 
 tArg *computeJacobi(void *threadArg);

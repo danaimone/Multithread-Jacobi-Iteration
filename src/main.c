@@ -167,12 +167,40 @@ void createThread(pthread_t *threads, int noth, barrier *bar) {
 
 tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
-while (threadArg->bar->continueIteration != 0) {
+    while (threadArg->bar->continueIteration != 0) {
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
-        arrive(threadArg->bar, threadArg, EPSILON);
+        epsilonCheck(EPSILON, threadArg, threadArg->bar);
+        arrive(threadArg->bar, threadArg);
+        //updateMatrix(threadArg->bar, threadArg);
         threadArg->delta = 0.0;
     }
     return threadArg;
+}
+
+//TODO: fix this to make it work. Should be some sort of rendezvous.
+void updateMatrix(barrier *bar, tArg *thread){
+    sem_wait(&bar->lock);
+    bar->currentThreads++;
+    sem_post(&bar->lock);
+
+    if (bar->currentThreads < bar->maxThreads) {
+        sem_wait(&bar->done[thread->customThreadId]);
+    } else {
+        swapMatrix(*thread->next, *thread->prev);
+        for (int i = 0; i < bar->maxThreads; i++) {
+            sem_post(&bar->done[i]);
+        }
+        sem_wait(&bar->done[thread->customThreadId]);
+        bar->currentThreads = 0;
+    }
+}
+
+void epsilonCheck(double epsilon, tArg *thread, barrier *bar){
+    sem_wait(&bar->lock);
+    if(thread->delta > epsilon){
+        bar->continueIteration = 2;
+    }
+    sem_post(&bar->lock);
 }
 
 tArg *makeThreadArg(int i, barrier *bar) {
