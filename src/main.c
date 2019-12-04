@@ -170,10 +170,13 @@ void createThread(pthread_t *threads, int noth, barrier *bar) {
 tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
     while (threadArg->bar->continueIteration != 0) {
-        arrive(threadArg->bar, threadArg);
+       arrive(threadArg->bar, threadArg);
 
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
-        epsilonCheck(EPSILON, threadArg, threadArg->bar);
+
+        if(threadArg->delta > EPSILON){
+            threadArg->bar->continueIteration = 2;
+        }
 
         arrive(threadArg->bar, threadArg);
 
@@ -181,7 +184,7 @@ tArg *computeJacobi(void *arg) {
             swapMatrix(*threadArg->next, *threadArg->prev);
             continueIteration(threadArg->bar);
         }
-
+        threadArg->delta = 0.0;
         arrive(threadArg->bar, threadArg);
     }
     return threadArg;
@@ -193,14 +196,6 @@ void continueIteration(barrier *bar){
     } else {
         bar->continueIteration = 1;
     }
-}
-
-void epsilonCheck(double epsilon, tArg *thread, barrier *bar){
-    sem_wait(thread->threadLock);
-    if(thread->delta > epsilon){
-        bar->continueIteration = 2;
-    }
-    sem_post(thread->threadLock);
 }
 
 tArg *makeThreadArg(int i, barrier *bar, sem_t *lock) {
@@ -217,12 +212,12 @@ tArg *makeThreadArg(int i, barrier *bar, sem_t *lock) {
 }
 
 void computeCell(double (*P)[MATRIX_SIZE], double (*N)[MATRIX_SIZE], tArg *thread) {
-    thread->delta = 0.0;
     int i = thread->customThreadId + 1;
     while (i < MATRIX_SIZE - 1) {
         for (int j = 1; j < MATRIX_SIZE - 1; j++) {
             (*N + 1024 * i)[j] = ((*P + 1024 * (i + 1))[j] + (*P + 1024 * (i - 1))[j] +
                                   (*P + 1024 * i)[j - 1] + (*P + 1024 * i)[j + 1]) / 4.0;
+
             double curDelta = (*N + 1024 * i)[j] - (*P + 1024 * i)[j];
             if (curDelta > thread->delta) {
                 thread->delta = curDelta;

@@ -52,7 +52,6 @@ void printMatrix(double (*matrix)[]);
  */
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
-void epsilonCheck(double epsilon, tArg *thread, barrier *bar);
 void continueIteration(barrier *bar);
 
 tArg *makeThreadArg(int i, barrier *bar, sem_t *lock);
