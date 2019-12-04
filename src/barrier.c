@@ -27,7 +27,7 @@ void freeBarrier(barrier *bar) {
     free(bar->done);
 }
 
-void arrive(barrier *bar, tArg *thread, double epsilon) {
+void arrive(barrier *bar, tArg *thread) {
     sem_wait(&bar->lock);
     bar->currentThreads++;
     sem_post(&bar->lock);

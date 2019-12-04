@@ -170,18 +170,19 @@ void createThread(pthread_t *threads, int noth, barrier *bar) {
 tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
     while (threadArg->bar->continueIteration != 0) {
-        arrive(threadArg->bar, threadArg, EPSILON);
+        arrive(threadArg->bar, threadArg);
 
         computeCell(*threadArg->prev, *threadArg->next, threadArg);
         epsilonCheck(EPSILON, threadArg, threadArg->bar);
 
-        arrive(threadArg->bar, threadArg, EPSILON);
+        arrive(threadArg->bar, threadArg);
 
         if(threadArg->customThreadId == 0){
             swapMatrix(*threadArg->next, *threadArg->prev);
             continueIteration(threadArg->bar);
         }
-        arrive(threadArg->bar, threadArg, EPSILON);
+
+        arrive(threadArg->bar, threadArg);
     }
     return threadArg;
 }
