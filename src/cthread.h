@@ -11,7 +11,6 @@
 
 typedef struct ThreadArg {
     sem_t *lock;
-    sem_t *threadLock;
     struct Barrier *bar;
     int customThreadId;
     double delta;

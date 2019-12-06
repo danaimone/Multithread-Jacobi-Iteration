@@ -78,6 +78,9 @@ void fileToMatrix(FILE *file, double (*matrix)[], char *programArgs[]) {
     }
 }
 
+/*
+ * Note: copies all values from source to destination
+ */
 void swapMatrix(double (*source)[], double (*dest)[]) {
     for (int i = 0; i < MATRIX_SIZE; i++) {
         for (int j = 0; j < MATRIX_SIZE; j++) {
@@ -153,20 +156,22 @@ void printUsage(char *argv[]) {
 
 
 void createThread(pthread_t *threads, int noth, barrier *bar) {
-    sem_t *lock = malloc(sizeof(sem_t));
-    sem_post(lock);
     for (int i = 0; i < noth; i++) {
-        tArg *threadArg = makeThreadArg(i, bar, lock);
+        tArg *threadArg = makeThreadArg(i, bar);
         pthread_create(&threads[i], NULL, computeJacobi, threadArg);
     }
 
     for (int i = 0; i < noth; i++) {
-        tArg *retArg;
+        void *retArg;
         pthread_join(threads[i], &retArg);
         free(retArg);
     }
 }
 
+/*
+ * Note: thread '0' is the 'main' thread that swaps the matrices and checks if the program
+ *       should continue.
+ */
 tArg *computeJacobi(void *arg) {
     tArg *threadArg = arg;
     while (threadArg->bar->continueIteration != 0) {
@@ -182,7 +187,7 @@ tArg *computeJacobi(void *arg) {
 
         if(threadArg->customThreadId == 0){
             swapMatrix(*threadArg->next, *threadArg->prev);
-            continueIteration(threadArg->bar);
+            continueIterationCheck(threadArg->bar);
         }
         threadArg->delta = 0.0;
         arrive(threadArg->bar, threadArg);
@@ -190,7 +195,11 @@ tArg *computeJacobi(void *arg) {
     return threadArg;
 }
 
-void continueIteration(barrier *bar){
+/*
+ * Note: continueIteration = 1 : exit
+ *                           2 : continue program
+ */
+void continueIterationCheck(barrier *bar){
     if(bar->continueIteration == 1){
         bar->continueIteration = 0;
     } else {
@@ -198,12 +207,11 @@ void continueIteration(barrier *bar){
     }
 }
 
-tArg *makeThreadArg(int i, barrier *bar, sem_t *lock) {
+tArg *makeThreadArg(int id, barrier *bar) {
     tArg *threadArg = malloc(sizeof(struct ThreadArg));
-    threadArg->customThreadId = i;
+    threadArg->customThreadId = id;
     threadArg->delta = 0.0;
-    threadArg->threadLock = lock;
-    threadArg->lock = &bar->done[i];
+    threadArg->lock = &bar->done[id];
     threadArg->next = &next;
     threadArg->prev = &previous;
     threadArg->bar = bar;

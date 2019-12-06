@@ -35,14 +35,6 @@ char *processArgs(int argc, char *argv[]);
  */
 void printUsage(char *argv[]);
 
-/*
- * Helper function: prints the contents of a matrix of doubles
- * Input:
- *  double matrix: matrix to be printed
- * Output: void
- */
-void printMatrix(double (*matrix)[]);
-
 /* Compute the values for the new matrix from the previous matrix.
  * Input:
  *  double (*P)[]: previous matrix
@@ -52,10 +44,23 @@ void printMatrix(double (*matrix)[]);
  */
 void computeCell(double (*P)[], double (*N)[], tArg *thread);
 
-void continueIteration(barrier *bar);
+/* Checks that the program should continue to iterate
+ * Input: shared barrier object
+ * Output: void
+ */
+void continueIterationCheck(barrier *bar);
 
-tArg *makeThreadArg(int i, barrier *bar, sem_t *lock);
+/* Create the thread argument that is passed into computeJacobi which
+ * is the threads main function
+ * Input: thread id, pointer to the shared barrier object
+ * Output: Populated thread argument
+ */
+tArg *makeThreadArg(int id, barrier *bar);
 
+/* Function that each thread runs independently to compute the new matrix
+ * Input: thread argument with respect to the thread that called this function
+ * Output: thread argument to be freed
+ */
 tArg *computeJacobi(void *threadArg);
 
 /* create the given number of threads

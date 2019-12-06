@@ -23,6 +23,10 @@ typedef struct Barrier {
  */
 void initBarrier(barrier *bar, int noth);
 
+/* Frees the elements inside the barrier
+ * Input: barrier object
+ * Output: void
+ */
 void freeBarrier(barrier *bar);
 
 /* Blocks all threads from continuing Jacobi iteration
