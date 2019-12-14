@@ -15,7 +15,7 @@ $ ./install.sh
 
 ```sh
 cd Release/
-./jacobi [filename]
+./jacobi filename [-t threads] [--time time of execution] [-e desired epsilon]
 ```
 
 ## Author
